@@ -172,7 +172,23 @@ including the two places this reimplementation has to compensate explicitly:
 `make_pv_thunk()` for vtable slots handed to foreign code, and the `_Ots*`
 compiler helpers, whose register-preservation contract gcc cannot express.
 
-## Note on third-party binaries
+## Provenance and licensing
+
+This is original code, but its provenance differs from the rest of the
+project and that is worth stating plainly. The Win32 layer in the
+[runtime repository](https://github.com/ytrezq/test-windows-dec-alpha-builds)
+was written against the *published* Win32 API — the clean-room position Wine
+occupies, which is why Wine ships in distributions and why the amd64 side of
+this comparison runs on stock `apt install wine`.
+
+MFC 4.2 does not offer that. It exports by ordinal with no published
+mapping, and the layout its clients depend on — vtable slot order, structure
+offsets, the message-map record — is undocumented. Recovering them meant
+analysing Microsoft's shipped binary and its public PDB. That is reverse
+engineering for interoperability, the same thing Wine does for undocumented
+interfaces, and the result here is still code written from scratch against
+what the analysis showed. But it is not the same as implementing a
+documented API, and calling it that would be misleading.
 
 No Microsoft binary is redistributed here. `tools/vtdump.py` expects you to
 supply your own `mfc42_x86.dll` and its PDB (the PDB is publicly available
