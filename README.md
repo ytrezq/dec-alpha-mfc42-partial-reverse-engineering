@@ -50,8 +50,19 @@ Anchors come from three places:
 
 **Indirect calls go through `v0`, not `pv`.** Microsoft's Alpha compiler
 loads the target into `v0` and calls through it, where the SysV convention
-used by GCC expects `pv`/`t12`. A GCC-compiled callee reached through a
-vtable therefore needs a thunk that sets `pv` before jumping.
+used by GCC expects `pv`/`t12`. Counted across `depends.exe`: 1,222 of 1,321
+indirect call sites use `$0`, **none** use `$27`, and at 1,320 of them `$27`
+is not written anywhere in the preceding six instructions. A GCC-compiled
+callee reached through a vtable therefore needs a thunk that sets `pv`
+before jumping — `make_pv_thunk()`.
+
+The exception, and the reason the import path works without help, is that
+Microsoft's *import stub* ends `ldq $27,(IAT) ; jmp $31,($27)`, which leaves
+the callee's address in `pv` and so satisfies the SysV contract by accident.
+`depends.exe` reaches this DLL only that way, so `make_pv_thunk()` is
+defensive for this particular application rather than load-bearing; the
+measurement and a controlled experiment that does break are in
+[ABI.md](https://github.com/ytrezq/dec-alpha-cross-binutils/blob/main/ABI.md).
 
 **`_Ots*` helpers cannot be written in C.** The compiler assumes they
 preserve every register it did not pass an argument in:
