@@ -151,6 +151,16 @@ python3 genmfc.py /path/to/your/depends.exe      # ordinal map + stubs
     --export-ord @mfc42.ords mfc42.c mfc42_stub.c
 ```
 
+## The boundary this runs across
+
+`depends.exe` is Microsoft-built AXP64; this `MFC42` is gcc-built. Every call
+between them crosses from one Alpha calling convention to another, and the
+two are not the same. What differs, and what it costs, is measured in
+**[ABI.md](https://github.com/ytrezq/dec-alpha-cross-binutils/blob/main/ABI.md)** —
+including the two places this reimplementation has to compensate explicitly:
+`make_pv_thunk()` for vtable slots handed to foreign code, and the `_Ots*`
+compiler helpers, whose register-preservation contract gcc cannot express.
+
 ## Note on third-party binaries
 
 No Microsoft binary is redistributed here. `tools/vtdump.py` expects you to
